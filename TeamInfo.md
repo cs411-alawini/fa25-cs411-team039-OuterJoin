@@ -5,7 +5,7 @@
 |   Info      |        Description     |
 | ----------- | ---------------------- |
 | TeamID      |        Team-039        |
-| TeamName    |         OuterJoin      |
+| TeamName    |        OuterJoin       |
 | Captain     |       Brian McManus    |
 | Captain     |  brianjm3@illinois.edu |
 | Member1     |        Rohan Ranjan    |
@@ -19,10 +19,10 @@
 
 |   Info      |        Description     |
 | ----------- | ---------------------- |
-|  Title      |       ProjectTitle     |
+|  Title      |       CarTinder        |
 | System URL  |      link_to_system    |
 | Video Link  |      link_to_video     |
 
 ## Project Summary
 
-This is a summary of the project!
+Car Tinder is an interactive mobile/web application designed to simplify the used car buying experience. Buying a car can be overwhelming due to fluctuating prices, inconsistent vehicle histories, varying fuel economy, and reliability concerns. Our app transforms the process into a fun and engaging experience by allowing users to swipe through personalized car recommendations based on their preference. It’s the same high stakes and high financial implications as Tinder, but for cars!!

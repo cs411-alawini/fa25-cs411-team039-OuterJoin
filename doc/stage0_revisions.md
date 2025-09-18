@@ -1,0 +1,2 @@
+We apologize, for stage 0 we submitted the URL to our repository which was https://github.com/cs411-alawini/fa25-cs411-team039-OuterJoin
+What was supposed to be submitted was the tagged release, which was created at the URL https://github.com/cs411-alawini/fa25-cs411-team000-sample/releases/tag/stage.0
