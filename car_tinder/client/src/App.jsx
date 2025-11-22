@@ -1,31 +1,63 @@
 import { useEffect, useState } from "react";
 
-// const API_BASE = "http://localhost:5174";
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 export default function App() {
   const [cars, setCars] = useState([]);
   const [status, setStatus] = useState("");
+  const [makeFilter, setMakeFilter] = useState("");
+  const [modelFilter, setModelFilter] = useState("");
+  const [yearFilter, setYearFilter] = useState("");
 
+  async function fetchCars({ make, model, year } = {}) {
+    try {
+      setStatus("Loading cars...");
+      const params = new URLSearchParams();
+      if (make) params.set("make", make);
+      if (model) params.set("model", model);
+      if (year) params.set("year", year);
+
+      const qs = params.toString();
+      const url = `${API_BASE}/api/cars${qs ? `?${qs}` : ""}`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Bad response");
+      const data = await res.json();
+      setCars(data);
+      setStatus("");
+    } catch (e) {
+      console.error(e);
+      setStatus("Failed to load cars");
+      setCars([]);
+    }
+  }
+
+  // initial load with no filters
   useEffect(() => {
-    fetch(`${API_BASE}/api/cars`)
-      .then(r => r.json())
-      .then(setCars)
-      .catch(() => setStatus("Failed to load cars"));
+    fetchCars();
   }, []);
 
-  async function like(car_id) {
+  function onSearch(e) {
+    e.preventDefault();
+    fetchCars({
+      make: makeFilter.trim(),
+      model: modelFilter.trim(),
+      year: yearFilter.trim(),
+    });
+  }
+
+  async function like(listing_id) {
     setStatus("Liking...");
     try {
       const res = await fetch(`${API_BASE}/api/swipes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: 1, car_id, action: "LIKE" })
+        body: JSON.stringify({ user_id: 1, listing_id, action: "LIKE" })
       });
       if (!res.ok) throw new Error("Bad response");
       setStatus("Saved LIKE ✅");
-      // For demo, no state change needed; you could remove the card, etc.
     } catch (e) {
+      console.error(e);
       setStatus("Failed to save swipe");
     }
   }
@@ -34,10 +66,41 @@ export default function App() {
     <div style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui" }}>
       <h1>Car Tinder</h1>
       <p style={{ opacity: 0.7 }}>End-to-end demo: retrieval + optional create</p>
+
+      {/* Search form */}
+      <form
+        onSubmit={onSearch}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gap: "0.5rem",
+          marginBottom: "1rem",
+          alignItems: "center"
+        }}
+      >
+        <input
+          placeholder="Make (e.g. Ford)"
+          value={makeFilter}
+          onChange={e => setMakeFilter(e.target.value)}
+        />
+        <input
+          placeholder="Model (e.g. Mustang)"
+          value={modelFilter}
+          onChange={e => setModelFilter(e.target.value)}
+        />
+        <input
+          placeholder="Year (e.g. 2020)"
+          value={yearFilter}
+          onChange={e => setYearFilter(e.target.value)}
+        />
+        <button type="submit">Search</button>
+      </form>
+
       {status && <p><em>{status}</em></p>}
+
       <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "1rem" }}>
         {cars.map(car => (
-          <li key={car.car_id} style={{
+          <li key={car.listing_id ?? car.car_id} style={{
             border: "1px solid #ddd",
             borderRadius: 12,
             padding: "1rem",
@@ -59,14 +122,17 @@ export default function App() {
                 {car.price ? `$${Number(car.price).toLocaleString()}` : "Price N/A"}
               </p>
               <div style={{ display: "flex", gap: "0.5rem" }}>
-                <button onClick={() => like(car.car_id)}>❤️ Like</button>
+                <button onClick={() => like(car.listing_id)}>❤️ Like</button>
                 <button onClick={() => alert("Pass (no-op)")}>👎 Pass</button>
               </div>
             </div>
           </li>
         ))}
       </ul>
-      {cars.length === 0 && <p>No cars yet—seed some data in the DB.</p>}
+
+      {cars.length === 0 && !status && (
+        <p>No cars found. Try different filters or seed some data in the DB.</p>
+      )}
     </div>
   );
 }
