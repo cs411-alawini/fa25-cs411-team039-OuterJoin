@@ -3,6 +3,8 @@ import CarService from "./service/carService.js";
 import UsernameInput from "./components/login/UsernameInput.jsx";
 import LoginService from "./service/loginService.js";
 
+import SwipeDeck from "./components/swipe/swipedeck/swipedeck.jsx";
+
 
 export default function App() {
   const [username, setUsername] = useState(null);
@@ -50,28 +52,26 @@ export default function App() {
     }
   }
 
-if (!username) {
-  return (
-    <UsernameInput
-      onSubmit={async ({ username, password }) => {
-        try {
-          const userId = await LoginService.login(username, password);
-          setUsername(username);
-          setUserId(userId);
-        } catch (err) {
-          alert("Invalid username or password");
-        }
-      }}
-    />
-  );
-}
-
-
+  if (!username) {
+    return (
+      <UsernameInput
+        onSubmit={async ({ username, password }) => {
+          try {
+            const userId = await LoginService.login(username, password);
+            setUsername(username);
+            setUserId(userId);
+          } catch (err) {
+            alert("Invalid username or password");
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <div style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui" }}>
       <h1>Car Tinder</h1>
-      <p style={{ opacity: 0.7 }}>Welcome, {username}!. UserID: {userId}</p>
+      <p style={{ opacity: 0.7 }}>Welcome, {username}! UserID: {userId}</p>
 
       {/* Search form */}
       <form
@@ -80,7 +80,7 @@ if (!username) {
           display: "grid",
           gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
           gap: "0.5rem",
-          marginBottom: "1rem",
+          marginBottom: "2rem",
           alignItems: "center",
         }}
       >
@@ -108,54 +108,12 @@ if (!username) {
         </p>
       )}
 
-      <ul
-        style={{
-          listStyle: "none",
-          padding: 0,
-          display: "grid",
-          gap: "1rem",
-        }}
-      >
-        {cars.map((car) => (
-          <li
-            key={car.listing_id ?? car.car_id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: 12,
-              padding: "1rem",
-              display: "grid",
-              gridTemplateColumns: "160px 1fr",
-              gap: "1rem",
-              alignItems: "center",
-            }}
-          >
-            <img
-              src={car.image_url || "https://placehold.co/320x200?text=Car"}
-              alt={`${car.make} ${car.model}`}
-              style={{
-                width: 160,
-                height: 100,
-                objectFit: "cover",
-                borderRadius: 8,
-              }}
-            />
-            <div>
-              <h3 style={{ margin: 0 }}>
-                {car.year} {car.make} {car.model}
-              </h3>
-              <p style={{ margin: "0.25rem 0 0.75rem" }}>
-                {car.price
-                  ? `$${Number(car.price).toLocaleString()}`
-                  : "Price N/A"}
-              </p>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <button onClick={() => like(car.listing_id)}>❤️ Like</button>
-                <button onClick={() => alert("Pass (no-op)")}>👎 Pass</button>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <SwipeDeck
+      cars={cars}
+      onLike={like}
+      onPass={(id) => console.log("pass", id)}
+    />
+
 
       {cars.length === 0 && !status && (
         <p>No cars found. Try different filters or seed some data in the DB.</p>

@@ -1,0 +1,32 @@
+.swipedeck-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.swipedeck-card {
+  margin-bottom: 1rem;
+}
+
+.swipedeck-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.like-btn, .pass-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border: none;
+}
+
+.like-btn {
+  background-color: #ff4f75;
+  color: white;
+}
+
+.pass-btn {
+  background-color: #ddd;
+}
