@@ -1,0 +1,35 @@
+.username-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 250px;
+  margin: 40px auto;
+  font-family: sans-serif;
+}
+
+.username-label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.username-input {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.username-button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.username-button:hover {
+  background-color: #0062cc;
+}

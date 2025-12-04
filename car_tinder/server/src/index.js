@@ -7,6 +7,7 @@ dotenv.config();
 const app = express();
 const allowed = new Set([
   "http://localhost:5173",
+  "http://localhost:5174",
   "http://127.0.0.1:5173",
   "https://car-tinder-476522.web.app"
 ]);
@@ -89,6 +90,65 @@ app.post("/api/swipes", async (req, res) => {
     res.status(500).json({ error: "Insert failed" });
   }
 });
+
+app.post("/api/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    console.log("LOGIN REQUEST:", { username, passwordProvided: !!password });
+
+    if (!username || !password) {
+      console.log("LOGIN FAILED: Missing username or password");
+      return res.status(400).json({ error: "Username and password required" });
+    }
+
+    console.log("QUERYING FOR EXISTING USER:", username);
+
+    const [existing] = await pool.query(
+      `SELECT user_id FROM User WHERE email = ? AND password = ?`,
+      [username, password]
+    );
+
+    console.log("QUERY RESULT:", existing);
+
+    if (existing.length > 0) {
+      console.log("LOGIN SUCCESS:", { user_id: existing[0].user_id });
+      return res.json({ user_id: existing[0].user_id });
+    }
+
+    console.log("USER NOT FOUND. GENERATING UNIQUE RANDOM ID");
+
+    let newUserId;
+    let collisionCheck;
+
+    do {
+      newUserId = Math.floor(100000 + Math.random() * 900000);
+      const [rows] = await pool.query(
+        `SELECT user_id FROM User WHERE user_id = ?`,
+        [newUserId]
+      );
+      collisionCheck = rows.length > 0;
+    } while (collisionCheck);
+
+    console.log("GENERATED USER ID:", newUserId);
+
+    const [result] = await pool.query(
+      `INSERT INTO User (user_id, email, password, created_at)
+       VALUES (?, ?, ?, NOW())`,
+      [newUserId, username, password]
+    );
+
+    console.log("NEW USER CREATED:", { user_id: newUserId });
+
+    return res.json({ user_id: newUserId });
+
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    res.status(500).json({ error: "Login or create failed" });
+  }
+});
+
+
 
 const port = Number(process.env.PORT || 5174 ||8080);
 app.listen(port, () => {
