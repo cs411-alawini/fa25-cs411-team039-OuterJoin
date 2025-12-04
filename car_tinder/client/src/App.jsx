@@ -52,6 +52,17 @@ export default function App() {
     }
   }
 
+    async function pass(listing_id) {
+    try {
+      setStatus("passing...");
+      await CarService.passCar({ user_id: userId, listing_id });
+      setStatus("Saved pass ❌");
+    } catch (err) {
+      console.error(err);
+      setStatus("Failed to save swipe");
+    }
+  }
+
   if (!username) {
     return (
       <UsernameInput
@@ -111,7 +122,7 @@ export default function App() {
     <SwipeDeck
       cars={cars}
       onLike={like}
-      onPass={(id) => console.log("pass", id)}
+      onPass={pass}
     />
 
 

@@ -41,6 +41,26 @@ class CarService {
 
     return res.json();
   }
+
+    static async passCar({ user_id, listing_id }) {
+    const url = `${API_BASE}/api/swipes`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id,
+        listing_id,
+        action: "PASS",
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to record LIKE");
+    }
+
+    return res.json();
+  }
 }
 
 export default CarService;

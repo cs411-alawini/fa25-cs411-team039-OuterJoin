@@ -69,27 +69,38 @@ app.get("/api/cars", async (req, res) => {
 });
 
 
-// minimal CREATE (record a swipe) ---
 app.post("/api/swipes", async (req, res) => {
   try {
-    const { user_id, listing_id, action } = req.body; // action: 'LIKE' | 'PASS'
+    const { user_id, listing_id, action } = req.body;
 
-    if (user_id == null || listing_id == null || !["LIKE", "PASS"].includes(action)) {
+    console.log("Swipe request received:", { user_id, listing_id, action });
+
+    if (
+      user_id == null ||
+      listing_id == null ||
+      !["LIKE", "PASS"].includes(action)
+    ) {
+      console.warn("Invalid swipe payload:", req.body);
       return res.status(400).json({ error: "Invalid payload" });
     }
 
-    await pool.query(
-      `INSERT INTO Swipe (user_id, listing_id, action, created_at)
-       VALUES (?, ?, ?, NOW())`,
-      [user_id, listing_id, action]
-    );
+    const query = `
+      INSERT INTO Swipe (user_id, listing_id, action, created_at)
+      VALUES (?, ?, ?, NOW())
+    `;
 
+    console.log("Executing SQL:", query, [user_id, listing_id, action]);
+
+    await pool.query(query, [user_id, listing_id, action]);
+
+    console.log("Swipe saved successfully");
     res.status(201).json({ ok: true });
   } catch (err) {
-    console.error(err);
+    console.error("Swipe insert failed:", err);
     res.status(500).json({ error: "Insert failed" });
   }
 });
+
 
 app.post("/api/login", async (req, res) => {
   try {
