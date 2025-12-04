@@ -1,16 +1,9 @@
-# React + Vite
+User info:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+When the frontend first renders, you are prompted to enter in a username and password combination. If this combination exists in the users database, it will log you in to that account. if the combination doesn't exist, it will create a user in the database and log in you into that account.
 
-Currently, two official plugins are available:
+After you are logged in, the following state variables are set on the frontend:
+  const [username, setUsername] = useState(null);
+  const [userId, setUserId] = useState(0);
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The username is assigned from whatever the user signed in with, and the userID is what the database call returns from whatever values the user entered to login. This userID is the primary key of our "User" database, so it will be used for creating preference and swipe entities.

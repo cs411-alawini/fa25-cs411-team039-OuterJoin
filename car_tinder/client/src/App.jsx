@@ -42,7 +42,7 @@ export default function App() {
   async function like(listing_id) {
     try {
       setStatus("Liking...");
-      await CarService.likeCar({ user_id: username, listing_id });
+      await CarService.likeCar({ user_id: userId, listing_id });
       setStatus("Saved LIKE ✅");
     } catch (err) {
       console.error(err);
