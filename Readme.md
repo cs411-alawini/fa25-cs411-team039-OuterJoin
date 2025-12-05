@@ -17,3 +17,6 @@ Individual code contribution will be used to evaluate individual contribution to
 
 
 
+
+Google doc to keep track of rubric stuff
+https://docs.google.com/document/d/1KkkJQPeyd7aguDb7wqsj-sLNtjYeVjaKCUEAhthhOAo/edit?usp=sharing

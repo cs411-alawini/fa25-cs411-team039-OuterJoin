@@ -242,6 +242,87 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+app.post("/api/liked-cars", async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    const [rows] = await pool.query(
+      `SELECT 
+        Car.car_id,
+        Car.make,
+        Car.model,
+        Car.year,
+        CarImage.image_url,
+        UsedCarListing.listing_id,
+        UsedCarListing.price
+      FROM Swipe
+      JOIN UsedCarListing USING(listing_id)
+      JOIN Car USING(car_id)
+      JOIN CarImage USING(car_id)
+      WHERE Swipe.user_id = ?
+      AND Swipe.action = 'LIKE'`,
+      [user_id]
+    );
+
+    res.json(rows);
+
+  } catch (err) {
+    console.error("Error fetching liked cars:", err);
+    res.status(500).json({ error: "Failed to fetch liked cars" });
+  }
+});
+
+app.post("/api/unlike-car", async (req, res) => {
+  console.log("UNLIKE request received:", req.body);
+
+  try {
+    const { user_id, listing_id } = req.body;
+
+    console.log(`Updating Swipe row — user_id: ${user_id}, listing_id: ${listing_id}`);
+
+    const [result] = await pool.query(
+      `UPDATE Swipe
+       SET action = 'PASS'
+       WHERE user_id = ? AND listing_id = ?`,
+      [user_id, listing_id]
+    );
+
+    console.log("UNLIKE query result:", result);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("UNLIKE ERROR:", err);
+    res.status(500).json({ error: "Failed to unlike car" });
+  }
+});
+
+
+app.post("/api/delete-like", async (req, res) => {
+  console.log("DELETE LIKE request received:", req.body);
+
+  try {
+    const { user_id, listing_id } = req.body;
+
+    console.log(`Deleting Swipe row — user_id: ${user_id}, listing_id: ${listing_id}`);
+
+    const [result] = await pool.query(
+      `DELETE FROM Swipe
+       WHERE user_id = ? AND listing_id = ?`,
+      [user_id, listing_id]
+    );
+
+    console.log("DELETE query result:", result);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("DELETE ERROR:", err);
+    res.status(500).json({ error: "Failed to delete liked car" });
+  }
+});
+
+
+
+
 
 
 const port = Number(process.env.PORT || 5174 ||8080);
