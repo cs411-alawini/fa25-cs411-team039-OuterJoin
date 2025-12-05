@@ -28,29 +28,28 @@ app.get("/api/cheap-cars", async (req, res) => {
 
   try {
     const sql = `
+        SELECT 
+            c.car_id,
+            c.make,
+            c.model,
+            c.year,
+            ci.image_url,
+            u.listing_id,
+            u.price,
+            avg_data.avg_price
+        FROM (
             SELECT 
-              Car.car_id,
-              Car.make,
-              Car.model,
-              Car.year,
-              CarImage.image_url,
-              UsedCarListing.listing_id,
-              UsedCarListing.price,
-              t.avg_price
-            FROM Car
-            NATURAL JOIN (
-                SELECT 
-                  car_id,
-                  make,
-                  model,
-                  AVG(price) AS avg_price
-                FROM Car NATURAL JOIN UsedCarListing
-                GROUP BY car_id, make, model
-                HAVING avg_price <= 20000
-            ) AS t
-            JOIN CarImage ON Car.car_id = CarImage.car_id
-            JOIN UsedCarListing ON UsedCarListing.car_id = Car.car_id
-            ORDER BY Car.year DESC;
+                car_id,
+                AVG(price) AS avg_price
+            FROM UsedCarListing
+            GROUP BY car_id
+            HAVING AVG(price) < 20000
+        ) AS avg_data
+        JOIN Car c ON avg_data.car_id = c.car_id
+        JOIN UsedCarListing u ON u.car_id = c.car_id
+        LEFT JOIN CarImage ci ON c.car_id = ci.car_id
+        ORDER BY avg_data.avg_price ASC;
+
 
     `;
 
@@ -60,6 +59,48 @@ app.get("/api/cheap-cars", async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error("Cheap car query failed:", err);
+    res.status(500).json({ error: "DB query failed" });
+  }
+});
+
+app.get("/api/most-liked-cars", async (req, res) => {
+  console.log("Executing most liked cars query");
+
+  try {
+    const sql = `
+          SELECT 
+              c.car_id,
+              c.make,
+              c.model,
+              c.year,
+              ci.image_url,
+              u.listing_id,
+              u.price,
+              COUNT(s.swipe_id) AS total_likes
+          FROM Swipe s
+          JOIN UsedCarListing u ON s.listing_id = u.listing_id
+          JOIN Car c ON u.car_id = c.car_id
+          LEFT JOIN CarImage ci ON c.car_id = ci.car_id
+          WHERE s.action = 'LIKE'
+          GROUP BY 
+              c.car_id,
+              c.make,
+              c.model,
+              c.year,
+              ci.image_url,
+              u.listing_id,
+              u.price
+          ORDER BY total_likes DESC
+          LIMIT 10;
+
+            `;
+
+
+    const [rows] = await pool.query(sql);
+
+    res.json(rows);
+  } catch (err) {
+    console.error("most liked car query failed:", err);
     res.status(500).json({ error: "DB query failed" });
   }
 });

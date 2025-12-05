@@ -76,6 +76,19 @@ export default function App() {
     }
   }
 
+    async function loadPopular() {
+    try {
+      setStatus("Loading cars under $20k...");
+      const data = await CarService.getMostLikedCars();
+      console.log("popular cars result:", data);
+      setCars(data);
+      setStatus("");
+    } catch (err) {
+      console.error("Failed to load popular cars:", err);
+      setStatus("Failed to load popular cars");
+    }
+  }
+
 
   if (!username) {
     return (
@@ -125,10 +138,15 @@ export default function App() {
         />
         <button type="submit">Search</button>
       </form>
+      <div>
+        <button type="button" onClick={loadCheapest} style={{ marginBottom: "1rem" }}>
+          Avg Price less than 20k
+        </button>
 
-      <button type="button" onClick={loadCheapest} style={{ marginBottom: "1rem" }}>
-        Avg Price less than 20k
-      </button>
+        <button type="button" onClick={loadPopular} style={{ marginBottom: "1rem" }}>
+          Top 10 Liked Cars
+        </button>
+      </div>
 
       {status && (
         <p>

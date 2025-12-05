@@ -62,13 +62,23 @@ class CarService {
     return res.json();
   }
 
-  // ✅ NEW METHOD: Fetch cheapest cars (static SQL)
   static async getCheapestCars() {
     const url = `${API_BASE}/api/cheap-cars`;
 
     const res = await fetch(url);
     if (!res.ok) {
       throw new Error("Failed to fetch cheapest cars");
+    }
+
+    return res.json();
+  }
+
+    static async getMostLikedCars() {
+    const url = `${API_BASE}/api/most-liked-cars`;
+
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error("Failed to fetch most liked cars");
     }
 
     return res.json();
