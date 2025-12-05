@@ -4,7 +4,7 @@ import UsernameInput from "./components/login/UsernameInput.jsx";
 import LoginService from "./service/loginService.js";
 
 import SwipeDeck from "./components/swipe/swipedeck/swipedeck.jsx";
-
+import LikedCarsModal from "./components/liked/LIkedCarsModal.jsx";
 
 export default function App() {
   const [username, setUsername] = useState(null);
@@ -14,6 +14,8 @@ export default function App() {
   const [makeFilter, setMakeFilter] = useState("");
   const [modelFilter, setModelFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
+  const [likedCars, setLikedCars] = useState([]);
+  const [showLikes, setShowLikes] = useState(false);
 
   async function fetchCars(filters = {}) {
     try {
@@ -31,6 +33,15 @@ export default function App() {
   useEffect(() => {
     fetchCars();
   }, []);
+
+  async function loadLikes() {
+    try {
+      const data = await CarService.getLikedCars(userId);
+      setLikedCars(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   function onSearch(e) {
     e.preventDefault();
@@ -52,7 +63,7 @@ export default function App() {
     }
   }
 
-    async function pass(listing_id) {
+  async function pass(listing_id) {
     try {
       setStatus("passing...");
       await CarService.passCar({ user_id: userId, listing_id });
@@ -67,28 +78,35 @@ export default function App() {
     try {
       setStatus("Loading cars under $20k...");
       const data = await CarService.getCheapestCars();
-      console.log("Cheap cars result:", data);
       setCars(data);
       setStatus("");
     } catch (err) {
-      console.error("Failed to load cheapest cars:", err);
+      console.error(err);
       setStatus("Failed to load cheapest cars");
     }
   }
 
-    async function loadPopular() {
+  async function loadPopular() {
     try {
       setStatus("Loading cars under $20k...");
       const data = await CarService.getMostLikedCars();
-      console.log("popular cars result:", data);
       setCars(data);
       setStatus("");
     } catch (err) {
-      console.error("Failed to load popular cars:", err);
+      console.error(err);
       setStatus("Failed to load popular cars");
     }
   }
 
+  async function handleUnlike(listing_id) {
+    await CarService.unlikeCar({ user_id: userId, listing_id });
+    await loadLikes();
+  }
+
+  async function handleDelete(listing_id) {
+    await CarService.deleteLikedCar({ user_id: userId, listing_id });
+    await loadLikes();
+  }
 
   if (!username) {
     return (
@@ -108,62 +126,59 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui" }}>
+      <LikedCarsModal
+        key={likedCars.length}          // ← FIX: forces re-render
+        open={showLikes}
+        onClose={() => setShowLikes(false)}
+        cars={likedCars}
+        onUnlike={handleUnlike}
+        onDelete={handleDelete}
+      />
+
       <h1>Car Tinder</h1>
       <p style={{ opacity: 0.7 }}>Welcome, {username}! UserID: {userId}</p>
+
+      <button
+        type="button"
+        onClick={async () => {
+          await loadLikes();
+          setShowLikes(true);
+        }}
+        style={{ marginBottom: "1rem" }}
+      >
+        ❤️ View My Likes
+      </button>
 
       <form
         onSubmit={onSearch}
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gridTemplateColumns: "repeat(4, minmax(0,1fr))",
           gap: "0.5rem",
           marginBottom: "2rem",
           alignItems: "center",
         }}
       >
-        <input
-          placeholder="Make (e.g. Ford)"
-          value={makeFilter}
-          onChange={(e) => setMakeFilter(e.target.value)}
-        />
-        <input
-          placeholder="Model (e.g. Mustang)"
-          value={modelFilter}
-          onChange={(e) => setModelFilter(e.target.value)}
-        />
-        <input
-          placeholder="Year (e.g. 2020)"
-          value={yearFilter}
-          onChange={(e) => setYearFilter(e.target.value)}
-        />
+        <input placeholder="Make (e.g. Ford)" value={makeFilter} onChange={(e) => setMakeFilter(e.target.value)} />
+        <input placeholder="Model (e.g. Mustang)" value={modelFilter} onChange={(e) => setModelFilter(e.target.value)} />
+        <input placeholder="Year (e.g. 2020)" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} />
         <button type="submit">Search</button>
       </form>
+
       <div>
         <button type="button" onClick={loadCheapest} style={{ marginBottom: "1rem" }}>
           Avg Price less than 20k
         </button>
-
         <button type="button" onClick={loadPopular} style={{ marginBottom: "1rem" }}>
           Top 10 Liked Cars
         </button>
       </div>
 
-      {status && (
-        <p>
-          <em>{status}</em>
-        </p>
-      )}
+      {status && <p><em>{status}</em></p>}
 
-    <SwipeDeck
-      cars={cars}
-      onLike={like}
-      onPass={pass}
-    />
+      <SwipeDeck cars={cars} onLike={like} onPass={pass} />
 
-
-      {cars.length === 0 && !status && (
-        <p>No cars found. Try different filters or seed some data in the DB.</p>
-      )}
+      {cars.length === 0 && !status && <p>No cars found. Try different filters or seed data.</p>}
     </div>
   );
 }
