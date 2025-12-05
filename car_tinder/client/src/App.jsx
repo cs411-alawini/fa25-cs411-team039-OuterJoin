@@ -35,6 +35,7 @@ export default function App() {
   }, []);
 
 
+
   async function loadLikes() {
     try {
       const data = await CarService.getLikedCars(userId);
@@ -57,6 +58,7 @@ export default function App() {
     try {
       setStatus("Liking...");
       await CarService.likeCar({ user_id: userId, listing_id });
+      await loadLikes();
       setStatus("Saved LIKE ✅");
     } catch (err) {
       console.error(err);
@@ -185,12 +187,15 @@ export default function App() {
         <button type="button" onClick={loadCheapest} style={{ marginBottom: "1rem" }}>
           Avg Price less than 20k
         </button>
-        <button type="button" onClick={loadPopular} style={{ marginBottom: "1rem" }}>
+        <button type="button" onClick={() => {loadPopular(); loadLikes();}}
+          style={{ marginBottom: "1rem" }}>
           Top 10 Liked Cars
         </button>
-        <button type="button" onClick={loadRecommended} style={{ marginBottom: "1rem" }}>
-          Our Recommendations
-        </button> 
+        {likedCars.length > 10 && (
+          <button type="button" onClick={loadRecommended} style={{ marginBottom: "1rem" }}>
+            Our Recommendations
+          </button>
+        )}
       </div>
 
       {status && <p><em>{status}</em></p>}
