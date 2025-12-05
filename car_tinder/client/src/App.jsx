@@ -3,8 +3,8 @@ import CarService from "./service/carService.js";
 import UsernameInput from "./components/login/UsernameInput.jsx";
 import LoginService from "./service/loginService.js";
 
-import SwipeDeck from "./components/swipe/swipedeck/swipedeck.jsx";
-import LikedCarsModal from "./components/liked/LIkedCarsModal.jsx";
+import SwipeDeck from "./components/swipe/swipedeck/SwipeDeck.jsx";
+import LikedCarsModal from "./components/liked/LikedCarsModal.jsx";
 
 export default function App() {
   const [username, setUsername] = useState(null);
