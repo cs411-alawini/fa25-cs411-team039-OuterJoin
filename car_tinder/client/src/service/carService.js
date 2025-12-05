@@ -123,6 +123,27 @@ class CarService {
     return res.json();
     }
 
+    static async getRecommendedCars(user_id, limit) {
+    try {
+      const response = await fetch(`${API_BASE}/api/recommendations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id, limit }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch recommendations");
+      }
+
+      const result = await response.json();
+
+      return result.data;
+    } catch (err) {
+      console.error("CarService.getRecommendedCars failed:", err);
+      throw err;
+    }
+  }
+
 }
 
 
