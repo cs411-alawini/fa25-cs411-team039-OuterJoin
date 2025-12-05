@@ -63,6 +63,20 @@ export default function App() {
     }
   }
 
+  async function loadCheapest() {
+    try {
+      setStatus("Loading cars under $20k...");
+      const data = await CarService.getCheapestCars();
+      console.log("Cheap cars result:", data);
+      setCars(data);
+      setStatus("");
+    } catch (err) {
+      console.error("Failed to load cheapest cars:", err);
+      setStatus("Failed to load cheapest cars");
+    }
+  }
+
+
   if (!username) {
     return (
       <UsernameInput
@@ -84,7 +98,6 @@ export default function App() {
       <h1>Car Tinder</h1>
       <p style={{ opacity: 0.7 }}>Welcome, {username}! UserID: {userId}</p>
 
-      {/* Search form */}
       <form
         onSubmit={onSearch}
         style={{
@@ -112,6 +125,10 @@ export default function App() {
         />
         <button type="submit">Search</button>
       </form>
+
+      <button type="button" onClick={loadCheapest} style={{ marginBottom: "1rem" }}>
+        Avg Price less than 20k
+      </button>
 
       {status && (
         <p>

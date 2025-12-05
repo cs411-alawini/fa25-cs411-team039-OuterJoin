@@ -23,6 +23,48 @@ app.use(express.json());
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
+app.get("/api/cheap-cars", async (req, res) => {
+  console.log("Executing static cheap cars query");
+
+  try {
+    const sql = `
+            SELECT 
+              Car.car_id,
+              Car.make,
+              Car.model,
+              Car.year,
+              CarImage.image_url,
+              UsedCarListing.listing_id,
+              UsedCarListing.price,
+              t.avg_price
+            FROM Car
+            NATURAL JOIN (
+                SELECT 
+                  car_id,
+                  make,
+                  model,
+                  AVG(price) AS avg_price
+                FROM Car NATURAL JOIN UsedCarListing
+                GROUP BY car_id, make, model
+                HAVING avg_price <= 20000
+            ) AS t
+            JOIN CarImage ON Car.car_id = CarImage.car_id
+            JOIN UsedCarListing ON UsedCarListing.car_id = Car.car_id
+            ORDER BY Car.year DESC;
+
+    `;
+
+
+    const [rows] = await pool.query(sql);
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Cheap car query failed:", err);
+    res.status(500).json({ error: "DB query failed" });
+  }
+});
+
+
 app.get("/api/cars", async (req, res) => {
   try {
     const { make, model, year } = req.query;
@@ -58,7 +100,7 @@ app.get("/api/cars", async (req, res) => {
       sql += " WHERE " + conditions.join(" AND ");
     }
 
-    sql += " ORDER BY Car.year DESC LIMIT 20";
+    sql += " ORDER BY Car.year DESC LIMIT 30";
 
     const [rows] = await pool.query(sql, params);
     res.json(rows);

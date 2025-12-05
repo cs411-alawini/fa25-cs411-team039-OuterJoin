@@ -42,7 +42,7 @@ class CarService {
     return res.json();
   }
 
-    static async passCar({ user_id, listing_id }) {
+  static async passCar({ user_id, listing_id }) {
     const url = `${API_BASE}/api/swipes`;
 
     const res = await fetch(url, {
@@ -56,7 +56,19 @@ class CarService {
     });
 
     if (!res.ok) {
-      throw new Error("Failed to record LIKE");
+      throw new Error("Failed to record PASS");
+    }
+
+    return res.json();
+  }
+
+  // ✅ NEW METHOD: Fetch cheapest cars (static SQL)
+  static async getCheapestCars() {
+    const url = `${API_BASE}/api/cheap-cars`;
+
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error("Failed to fetch cheapest cars");
     }
 
     return res.json();
