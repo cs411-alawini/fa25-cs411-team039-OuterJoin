@@ -83,6 +83,48 @@ class CarService {
 
     return res.json();
   }
+
+    static async getLikedCars(user_id) {
+    const url = `${API_BASE}/api/liked-cars`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch liked cars");
+    }
+
+    return res.json();
+  }
+    static async unlikeCar({ user_id, listing_id }) {
+    const res = await fetch(`${API_BASE}/api/unlike-car`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id, listing_id }),
+    });
+
+    if (!res.ok) throw new Error("Failed to unlike car");
+    return res.json();
+    }
+
+    static async deleteLikedCar({ user_id, listing_id }) {
+    const res = await fetch(`${API_BASE}/api/delete-like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id, listing_id }),
+    });
+
+    if (!res.ok) throw new Error("Failed to delete liked car");
+    return res.json();
+    }
+
 }
+
+
 
 export default CarService;
