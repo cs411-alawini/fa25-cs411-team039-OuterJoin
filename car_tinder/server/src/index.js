@@ -151,6 +151,32 @@ app.get("/api/cars", async (req, res) => {
   }
 });
 
+app.post("/api/recommendations", async (req, res) => {
+  try {
+    const { user_id, limit } = req.body;
+
+    console.log("Recommendation request received:", { user_id, limit });
+
+    if (user_id == null || limit == null) {
+      console.warn("Invalid recommendation payload:", req.body);
+      return res.status(400).json({ error: "Invalid payload" });
+    }
+
+    const query = `CALL sp_get_recommended_cars(?, ?)`;
+
+    console.log("Executing stored procedure:", query, [user_id, limit]);
+
+    const [rows] = await pool.query(query, [user_id, limit]);
+
+    console.log("Stored procedure executed successfully");
+    res.status(200).json({ ok: true, data: rows[0] });
+  } catch (err) {
+    console.error("Stored procedure call failed:", err);
+    res.status(500).json({ error: "Procedure call failed" });
+  }
+});
+
+
 
 app.post("/api/swipes", async (req, res) => {
   try {

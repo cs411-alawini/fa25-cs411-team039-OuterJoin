@@ -1,33 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CarCard from "../carcard/CarCard.jsx";
 import "./SwipeDeck.css";
 
-export default function SwipeDeck({ cars, onLike, onPass }) {
+export default function SwipeDeck({ cars, onLike, onPass, onDeckEmpty }) {
   const [index, setIndex] = useState(0);
 
-  // Safeguards
+  useEffect(() => {
+    setIndex(0);
+  }, [cars]);
+
   if (!cars || cars.length === 0) {
     return <p>No cars loaded.</p>;
   }
+
   if (index >= cars.length) {
-    return <p>No more cars available. Try another search!</p>;
+    if (onDeckEmpty) {
+      onDeckEmpty();    
+    }
+    return <p>Loading more cars...</p>;
   }
 
   const car = cars[index];
 
+  function goNext() {
+    const next = index + 1;
+
+    if (next >= cars.length) {
+      if (onDeckEmpty) {
+        onDeckEmpty();   
+      }
+    } else {
+      setIndex(next);
+    }
+  }
+
   function handleLike() {
     onLike(car.listing_id);
-    setIndex((prev) => prev + 1);
+    goNext();
   }
 
   function handlePass() {
     onPass?.(car.listing_id);
-    setIndex((prev) => prev + 1);
+    goNext();
   }
 
   return (
     <div className="swipedeck-container">
-      {/* This displays the car details correctly */}
       <CarCard car={car} />
 
       <div className="swipedeck-buttons">

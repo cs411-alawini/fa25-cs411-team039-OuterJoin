@@ -34,6 +34,7 @@ export default function App() {
     fetchCars();
   }, []);
 
+
   async function loadLikes() {
     try {
       const data = await CarService.getLikedCars(userId);
@@ -98,6 +99,21 @@ export default function App() {
     }
   }
 
+  async function loadRecommended() {
+    try {
+      setStatus("Loading recommended cars");
+
+      const data = await CarService.getRecommendedCars(userId, 20);
+
+      setCars(data);
+      setStatus("");
+    } catch (err) {
+      console.error(err);
+      setStatus("Failed to load recommended cars");
+    }
+  }
+
+
   async function handleUnlike(listing_id) {
     await CarService.unlikeCar({ user_id: userId, listing_id });
     await loadLikes();
@@ -127,7 +143,7 @@ export default function App() {
   return (
     <div style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui" }}>
       <LikedCarsModal
-        key={likedCars.length}          // ← FIX: forces re-render
+        key={likedCars.length}        
         open={showLikes}
         onClose={() => setShowLikes(false)}
         cars={likedCars}
@@ -172,11 +188,20 @@ export default function App() {
         <button type="button" onClick={loadPopular} style={{ marginBottom: "1rem" }}>
           Top 10 Liked Cars
         </button>
+        <button type="button" onClick={loadRecommended} style={{ marginBottom: "1rem" }}>
+          Our Recommendations
+        </button> 
       </div>
 
       {status && <p><em>{status}</em></p>}
 
-      <SwipeDeck cars={cars} onLike={like} onPass={pass} />
+      <SwipeDeck
+        cars={cars}
+        onLike={like}
+        onPass={pass}
+        onDeckEmpty={loadRecommended}
+      />
+
 
       {cars.length === 0 && !status && <p>No cars found. Try different filters or seed data.</p>}
     </div>
