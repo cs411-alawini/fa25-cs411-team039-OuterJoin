@@ -274,19 +274,21 @@ app.post("/api/liked-cars", async (req, res) => {
 
     const [rows] = await pool.query(
       `SELECT 
-        Car.car_id,
-        Car.make,
-        Car.model,
-        Car.year,
-        CarImage.image_url,
-        UsedCarListing.listing_id,
-        UsedCarListing.price
-      FROM Swipe
-      JOIN UsedCarListing USING(listing_id)
-      JOIN Car USING(car_id)
-      JOIN CarImage USING(car_id)
-      WHERE Swipe.user_id = ?
-      AND Swipe.action = 'LIKE'`,
+          Car.car_id,
+          Car.make,
+          Car.model,
+          Car.year,
+          CarImage.image_url,
+          UsedCarListing.listing_id,
+          UsedCarListing.price,
+          Swipe.created_at
+        FROM Swipe
+        JOIN UsedCarListing USING(listing_id)
+        JOIN Car USING(car_id)
+        JOIN CarImage USING(car_id)
+        WHERE Swipe.user_id = ?
+          AND Swipe.action = 'LIKE'
+        ORDER BY Swipe.created_at DESC`,
       [user_id]
     );
 
