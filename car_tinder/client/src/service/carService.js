@@ -73,7 +73,7 @@ class CarService {
     return res.json();
   }
 
-    static async getMostLikedCars() {
+  static async getMostLikedCars() {
     const url = `${API_BASE}/api/most-liked-cars`;
 
     const res = await fetch(url);
@@ -84,15 +84,13 @@ class CarService {
     return res.json();
   }
 
-    static async getLikedCars(user_id) {
+  static async getLikedCars(user_id) {
     const url = `${API_BASE}/api/liked-cars`;
 
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id,
-      }),
+      body: JSON.stringify({ user_id }),
     });
 
     if (!res.ok) {
@@ -101,29 +99,30 @@ class CarService {
 
     return res.json();
   }
-    static async unlikeCar({ user_id, listing_id }) {
+
+  static async unlikeCar({ user_id, listing_id }) {
     const res = await fetch(`${API_BASE}/api/unlike-car`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id, listing_id }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id, listing_id }),
     });
 
     if (!res.ok) throw new Error("Failed to unlike car");
     return res.json();
-    }
+  }
 
-    static async deleteLikedCar({ user_id, listing_id }) {
+  static async deleteLikedCar({ user_id, listing_id }) {
     const res = await fetch(`${API_BASE}/api/delete-like`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id, listing_id }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id, listing_id }),
     });
 
     if (!res.ok) throw new Error("Failed to delete liked car");
     return res.json();
-    }
+  }
 
-    static async getRecommendedCars(user_id, limit) {
+  static async getRecommendedCars(user_id, limit) {
     try {
       const response = await fetch(`${API_BASE}/api/recommendations`, {
         method: "POST",
@@ -136,7 +135,6 @@ class CarService {
       }
 
       const result = await response.json();
-
       return result.data;
     } catch (err) {
       console.error("CarService.getRecommendedCars failed:", err);
@@ -144,8 +142,19 @@ class CarService {
     }
   }
 
+  static async resetLikes(user_id) {
+    const res = await fetch(`${API_BASE}/api/reset-likes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to reset likes");
+    }
+
+    return res.json();
+  }
 }
-
-
 
 export default CarService;

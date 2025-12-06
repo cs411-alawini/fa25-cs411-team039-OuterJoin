@@ -126,6 +126,15 @@ export default function App() {
     await loadLikes();
   }
 
+  async function handleResetLikes() {
+    try {
+      await CarService.resetLikes(userId);
+      await loadLikes();        // refresh list
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   if (!username) {
     return (
       <UsernameInput
@@ -145,12 +154,13 @@ export default function App() {
   return (
     <div style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui" }}>
       <LikedCarsModal
-        key={likedCars.length}        
+        key={likedCars.length}
         open={showLikes}
         onClose={() => setShowLikes(false)}
         cars={likedCars}
         onUnlike={handleUnlike}
         onDelete={handleDelete}
+        onResetLikes={handleResetLikes}
       />
 
       <h1>Car Tinder</h1>

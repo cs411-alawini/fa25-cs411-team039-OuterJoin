@@ -349,7 +349,75 @@ app.post("/api/delete-like", async (req, res) => {
 });
 
 
+app.post("/api/reset-likes", async (req, res) => {
+  const { user_id } = req.body;
 
+  if (user_id == null) {
+    return res.status(400).json({ error: "user_id required" });
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    // Explicitly set the isolation level for this transaction
+    await conn.query("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ");
+    await conn.beginTransaction();
+
+    // 1) Log what we're removing (advanced query: aggregation + GROUP BY)
+    const [logInsert] = await conn.query(
+      `
+      INSERT INTO UserActionLog (user_id, removed_likes, removed_passes, removed_listings)
+      SELECT 
+          s.user_id,
+          SUM(CASE WHEN s.action = 'LIKE' THEN 1 ELSE 0 END) AS removed_likes,
+          SUM(CASE WHEN s.action = 'PASS' THEN 1 ELSE 0 END) AS removed_passes,
+          COUNT(DISTINCT s.listing_id) AS removed_listings
+      FROM Swipe s
+      WHERE s.user_id = ?
+      GROUP BY s.user_id
+      `,
+      [user_id]
+    );
+
+    // 2) Archive all this user's swipes (advanced query: multi-join INSERT...SELECT)
+    const [archiveResult] = await conn.query(
+      `
+      INSERT INTO SwipeArchive (user_id, listing_id, action, created_at, archived_at)
+      SELECT 
+          s.user_id,
+          s.listing_id,
+          s.action,
+          s.created_at,
+          NOW() AS archived_at
+      FROM Swipe s
+      JOIN UsedCarListing u ON s.listing_id = u.listing_id
+      JOIN Car c ON u.car_id = c.car_id
+      WHERE s.user_id = ? AND s.action = 'LIKE'
+      `,
+      [user_id]
+    );
+
+    // 3) Delete the original LIKE rows
+    const [deleteResult] = await conn.query(
+      `DELETE FROM Swipe WHERE user_id = ? AND action = 'LIKE'`,
+      [user_id]
+    );
+
+    await conn.commit();
+
+    res.json({
+      success: true,
+      log_id: logInsert.insertId,
+      archived_rows: archiveResult.affectedRows,
+      deleted_rows: deleteResult.affectedRows,
+    });
+  } catch (err) {
+    await conn.rollback();
+    console.error("RESET LIKES ERROR:", err);
+    res.status(500).json({ error: "Failed to reset likes" });
+  } finally {
+    conn.release();
+  }
+});
 
 
 
