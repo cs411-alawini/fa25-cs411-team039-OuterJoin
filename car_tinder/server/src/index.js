@@ -33,6 +33,7 @@ app.get("/api/cheap-cars", async (req, res) => {
             c.make,
             c.model,
             c.year,
+            c.mpg,
             ci.image_url,
             u.listing_id,
             u.price,
@@ -73,6 +74,7 @@ app.get("/api/most-liked-cars", async (req, res) => {
               c.make,
               c.model,
               c.year,
+              c.mpg,
               ci.image_url,
               u.listing_id,
               u.price,
@@ -108,10 +110,10 @@ app.get("/api/most-liked-cars", async (req, res) => {
 
 app.get("/api/cars", async (req, res) => {
   try {
-    const { make, model, year, user_id } = req.query;
+    const { make, model, year, user_id, mpg } = req.query;
 
     let sql = `
-      SELECT Car.car_id, Car.make, Car.model, Car.year, CarImage.image_url, UsedCarListing.listing_id, UsedCarListing.price
+      SELECT Car.car_id, Car.make, Car.model, Car.year, Car.mpg, CarImage.image_url, UsedCarListing.listing_id, UsedCarListing.price
       FROM Car JOIN CarImage ON Car.car_id = CarImage.car_id JOIN UsedCarListing ON UsedCarListing.car_id = Car.car_id
     `;
 
@@ -148,7 +150,6 @@ app.get("/api/cars", async (req, res) => {
     }
 
     if (year) {
-      // basic numeric guard, avoid weird input
       const yearNum = Number(year);
       if (!Number.isNaN(yearNum)) {
         conditions.push("Car.year = ?");
@@ -355,6 +356,7 @@ app.post("/api/liked-cars", async (req, res) => {
           Car.make,
           Car.model,
           Car.year,
+          Car.mpg,
           CarImage.image_url,
           UsedCarListing.listing_id,
           UsedCarListing.price,

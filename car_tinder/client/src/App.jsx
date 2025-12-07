@@ -19,6 +19,8 @@ export default function App() {
   const [showLikes, setShowLikes] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   const [preferences, setPreferences] = useState(null);
+  const [activeFilter, setActiveFilter] = useState(null); 
+
 
   async function fetchCars(filters = {}) {
     try {
@@ -32,6 +34,13 @@ export default function App() {
       setCars([]);
     }
   }
+  function handleClearFilters() {
+    setActiveFilter(null);
+    setMakeFilter("");
+    setModelFilter("");
+    setYearFilter("");
+    fetchCars();
+  }
 
   useEffect(() => {
     fetchCars();
@@ -41,6 +50,7 @@ export default function App() {
     if (userId) {
       CarService.getPreferences(userId).then(setPreferences).catch(console.error);
       fetchCars();
+      loadLikes();
     }
   }, [userId]);
 
@@ -172,7 +182,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui" }}>
+    <div style={{ maxWidth: 1000, margin: "2rem auto", fontFamily: "system-ui" }}>
       <LikedCarsModal
         key={likedCars.length}
         open={showLikes}
@@ -184,27 +194,27 @@ export default function App() {
       />
 
       <h1>Car Tinder</h1>
-      <p style={{ opacity: 0.7 }}>Welcome, {username}! UserID: {userId}</p>
+      <p className="Welcome" style={{ opacity: 0.7 }}>Welcome, {username}! UserID: {userId}</p>
+      <div className="Users">
+        <button
+          type="button"
+          onClick={async () => {
+            await loadLikes();
+            setShowLikes(true);
+          }}
+          style={{ marginBottom: "1rem", marginRight: "1rem" }}
+        >
+          ❤️ View My Likes
+        </button>
 
-      <button
-        type="button"
-        onClick={async () => {
-          await loadLikes();
-          setShowLikes(true);
-        }}
-        style={{ marginBottom: "1rem", marginRight: "1rem" }}
-      >
-        ❤️ View My Likes
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setShowPreferences(true)}
-        style={{ marginBottom: "1rem" }}
-      >
-        ⚙️ Preferences
-      </button>
-
+        <button
+          type="button"
+          onClick={() => setShowPreferences(true)}
+          style={{ marginBottom: "1rem" }}
+        >
+          ⚙️ Preferences
+        </button>
+      </div>
       {showPreferences && (
         <PreferencesModal
           userId={userId}
@@ -213,6 +223,66 @@ export default function App() {
           initialPreferences={preferences}
         />
       )}
+      <div className="Filters">
+        <h2>Filters:</h2>
+        <div>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveFilter("cheapest");
+              loadCheapest();
+            }}
+            className={activeFilter === "cheapest" ? "filter-active" : ""}
+            style={{ marginBottom: "1rem" }}
+          >
+            Avg Price less than 20k
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveFilter("popular");
+              loadPopular();
+              loadLikes();
+            }}
+            className={activeFilter === "popular" ? "filter-active" : ""}
+            style={{ marginBottom: "1rem" }}
+          >
+            Top 10 Liked Cars
+          </button>
+
+          {likedCars.length > 10 && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveFilter("recommended");
+                loadRecommended();
+              }}
+              className={activeFilter === "recommended" ? "filter-active" : ""}
+              style={{ marginBottom: "1rem" }}
+            >
+              Our Recommendations
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            style={{ marginBottom: "1rem" }}
+          >
+            Clear Filters
+          </button>
+        </div>
+      </div>
+
+      {status && <p><em>{status}</em></p>}
+
+      <SwipeDeck
+        cars={cars}
+        onLike={like}
+        onPass={pass}
+        onDeckEmpty={loadRecommended}
+      />
 
       <form
         onSubmit={onSearch}
@@ -229,33 +299,7 @@ export default function App() {
         <input placeholder="Year (e.g. 2020)" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} />
         <button type="submit">Search</button>
       </form>
-
-      <div>
-        <button type="button" onClick={loadCheapest} style={{ marginBottom: "1rem" }}>
-          Avg Price less than 20k
-        </button>
-        <button type="button" onClick={() => {loadPopular(); loadLikes();}}
-          style={{ marginBottom: "1rem" }}>
-          Top 10 Liked Cars
-        </button>
-        {likedCars.length > 10 && (
-          <button type="button" onClick={loadRecommended} style={{ marginBottom: "1rem" }}>
-            Our Recommendations
-          </button>
-        )}
-      </div>
-
-      {status && <p><em>{status}</em></p>}
-
-      <SwipeDeck
-        cars={cars}
-        onLike={like}
-        onPass={pass}
-        onDeckEmpty={loadRecommended}
-      />
-
-
-      {cars.length === 0 && !status && <p>No cars found. Try different filters or seed data.</p>}
+      {cars.length === 0 && !status && <p>No cars found.</p>}
     </div>
   );
 }

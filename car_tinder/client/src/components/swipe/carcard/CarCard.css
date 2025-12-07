@@ -2,7 +2,7 @@
   width: 350px;
   height: 500px;
   border-radius: 20px;
-  background: black;
+  background: rgb(179, 179, 179);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -21,9 +21,18 @@
   margin: 0;
   font-size: 22px;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .carcard-price {
+  margin-top: 6px;
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.carcard-mpg {
   margin-top: 6px;
   font-size: 18px;
   opacity: 0.8;

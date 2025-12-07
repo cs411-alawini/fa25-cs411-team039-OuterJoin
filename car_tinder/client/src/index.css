@@ -33,6 +33,13 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  display: flex;
+  justify-self: center;
+}
+
+.Welcome{
+  display: flex;
+  justify-self: center;
 }
 
 button {
@@ -45,6 +52,7 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  margin: 1rem;
 }
 button:hover {
   border-color: #646cff;
@@ -63,6 +71,26 @@ button:focus-visible {
     color: #747bff;
   }
   button {
-    background-color: #f9f9f9;
+    background-color: #b0e0eb;
   }
+}
+
+body {
+  background-color:#e7c0d9;
+}
+
+.Users{
+  display: flex;
+  justify-content: center;
+}
+
+.Filters{
+  display: flex;
+  justify-content: space-between;
+}
+
+.filter-active {
+  background-color: #ffd34d;
+  color: #000;
+  border-color: #e0ad00;
 }

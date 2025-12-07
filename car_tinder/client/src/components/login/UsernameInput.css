@@ -2,9 +2,10 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 250px;
+  width: fit-content;
   margin: 40px auto;
-  font-family: sans-serif;
+  align-items: center;
+  text-align: center;
 }
 
 .username-label {
@@ -17,6 +18,7 @@
   font-size: 16px;
   border-radius: 6px;
   border: 1px solid #ccc;
+  width: 250px;
 }
 
 .username-button {
@@ -28,8 +30,17 @@
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  width: 250px;
 }
 
 .username-button:hover {
   background-color: #0062cc;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
 }

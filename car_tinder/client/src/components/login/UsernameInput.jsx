@@ -14,7 +14,8 @@ export default function UsernameInput({ onSubmit }) {
 
   return (
     <form className="username-form" onSubmit={handleSubmit}>
-      <label className="username-label">Enter Username</label>
+      <h1>Welcome to Car Tinder!</h1>
+      <label className="username-label">Username</label>
       <input
         type="text"
         className="username-input"
@@ -23,7 +24,7 @@ export default function UsernameInput({ onSubmit }) {
         onChange={(e) => setUsername(e.target.value)}
       />
 
-      <label className="username-label">Enter Password</label>
+      <label className="username-label">Password</label>
       <input
         type="password"
         className="username-input"
