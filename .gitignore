@@ -5,7 +5,7 @@ scripts/*
 cloud-sql-proxy
 Datasets/canonical_images
 
-
+google-cloud-sdk/
 car_tinder/**/node_modules/
 car_tinder/**/dist/
 car_tinder/**/build/

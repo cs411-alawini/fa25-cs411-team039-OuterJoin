@@ -5,6 +5,7 @@ import LoginService from "./service/loginService.js";
 
 import SwipeDeck from "./components/swipe/swipedeck/SwipeDeck.jsx";
 import LikedCarsModal from "./components/liked/LikedCarsModal.jsx";
+import PreferencesModal from "./components/preferences/PreferencesModal.jsx";
 
 export default function App() {
   const [username, setUsername] = useState(null);
@@ -16,11 +17,13 @@ export default function App() {
   const [yearFilter, setYearFilter] = useState("");
   const [likedCars, setLikedCars] = useState([]);
   const [showLikes, setShowLikes] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
+  const [preferences, setPreferences] = useState(null);
 
   async function fetchCars(filters = {}) {
     try {
       setStatus("Loading cars...");
-      const data = await CarService.fetchCars(filters);
+      const data = await CarService.fetchCars({ ...filters, user_id: userId });
       setCars(data);
       setStatus("");
     } catch (err) {
@@ -34,7 +37,24 @@ export default function App() {
     fetchCars();
   }, []);
 
+  useEffect(() => {
+    if (userId) {
+      CarService.getPreferences(userId).then(setPreferences).catch(console.error);
+      fetchCars();
+    }
+  }, [userId]);
 
+  async function handleSavePreferences(newPrefs) {
+    try {
+      await CarService.savePreferences(newPrefs);
+      setPreferences(newPrefs);
+      setShowPreferences(false);
+      fetchCars();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save preferences");
+    }
+  }
 
   async function loadLikes() {
     try {
@@ -172,10 +192,27 @@ export default function App() {
           await loadLikes();
           setShowLikes(true);
         }}
-        style={{ marginBottom: "1rem" }}
+        style={{ marginBottom: "1rem", marginRight: "1rem" }}
       >
         ❤️ View My Likes
       </button>
+
+      <button
+        type="button"
+        onClick={() => setShowPreferences(true)}
+        style={{ marginBottom: "1rem" }}
+      >
+        ⚙️ Preferences
+      </button>
+
+      {showPreferences && (
+        <PreferencesModal
+          userId={userId}
+          onClose={() => setShowPreferences(false)}
+          onSave={handleSavePreferences}
+          initialPreferences={preferences}
+        />
+      )}
 
       <form
         onSubmit={onSearch}
