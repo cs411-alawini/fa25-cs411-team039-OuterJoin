@@ -108,7 +108,7 @@ app.get("/api/most-liked-cars", async (req, res) => {
 
 app.get("/api/cars", async (req, res) => {
   try {
-    const { make, model, year } = req.query;
+    const { make, model, year, user_id } = req.query;
 
     let sql = `
       SELECT Car.car_id, Car.make, Car.model, Car.year, CarImage.image_url, UsedCarListing.listing_id, UsedCarListing.price
@@ -117,6 +117,25 @@ app.get("/api/cars", async (req, res) => {
 
     const conditions = [];
     const params = [];
+
+    if (user_id) {
+      const [prefRows] = await pool.query("SELECT * FROM Preferences WHERE user_id = ?", [user_id]);
+      if (prefRows.length > 0) {
+        const p = prefRows[0];
+        if (p.min_price) {
+          conditions.push("UsedCarListing.price >= ?");
+          params.push(p.min_price);
+        }
+        if (p.max_price) {
+          conditions.push("UsedCarListing.price <= ?");
+          params.push(p.max_price);
+        }
+        if (p.min_year) {
+          conditions.push("Car.year >= ?");
+          params.push(p.min_year);
+        }
+      }
+    }
 
     if (make) {
       conditions.push("Car.make LIKE ?");
@@ -148,6 +167,64 @@ app.get("/api/cars", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "DB query failed" });
+  }
+});
+
+app.post("/api/preferences", async (req, res) => {
+  try {
+    const { user_id, min_price, max_price, min_year } = req.body;
+    
+    const val = (v) => (v === "" ? null : v);
+
+
+    const [existing] = await pool.query("SELECT preference_id FROM Preferences WHERE user_id = ?", [user_id]);
+
+    if (existing.length > 0) {
+      const sql = `
+        UPDATE Preferences 
+        SET 
+          min_price = ?,
+          max_price = ?,
+          min_year = ?
+        WHERE user_id = ?
+      `;
+      await pool.query(sql, [
+        val(min_price), 
+        val(max_price), 
+        val(min_year), 
+        user_id
+      ]);
+    } else {
+      const preference_id = Math.floor(Math.random() * 2000000000); 
+      
+      const sql = `
+        INSERT INTO Preferences (preference_id, user_id, min_price, max_price, min_year, created_at)
+        VALUES (?, ?, ?, ?, ?, NOW())
+      `;
+      await pool.query(sql, [
+        preference_id,
+        user_id, 
+        val(min_price), 
+        val(max_price), 
+        val(min_year)
+      ]);
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Preferences save failed:", err);
+    res.status(500).json({ error: "Failed to save preferences" });
+  }
+});
+
+app.get("/api/preferences/:user_id", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const [rows] = await pool.query("SELECT * FROM Preferences WHERE user_id = ?", [user_id]);
+    res.json(rows[0] || {});
+  } catch (err) {
+    console.error("Preferences fetch failed:", err);
+    res.status(500).json({ error: "Failed to fetch preferences" });
   }
 });
 
